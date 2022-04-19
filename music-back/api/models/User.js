@@ -8,6 +8,7 @@ let users = [
     password: "123",
   },
 ];
+
 const jwt = require("jsonwebtoken");
 
 class User {

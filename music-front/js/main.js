@@ -1,10 +1,53 @@
-let musics = [];
+//
+// header functionility
+let inputSearch = document.getElementById("inputSearch");
+let btnSearch = document.getElementById("btnSearch");
+
+btnSearch.onclick = async () => {
+  let value = inputSearch.value;
+  if (value !== "") {
+    let msgSearch = document.getElementById("msgSearch");
+    msgSearch.innerText = `Results of '${value}'`;
+  } else msgSearch.innerText = "";
+  await searchMusic(value);
+};
+
+let btnLogout = document.getElementById("btnLogout");
+btnLogout.onclick = () => {
+  console.log("Logout");
+  localStorage.removeItem("token");
+  document.location.replace("login.html");
+};
+
+async function searchMusic(title) {
+  try {
+    // console.log(cookie);
+    allMusics = await (
+      await fetch(`${BASE_URL}/search?title=${title}`, {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("token"),
+          "Content-Type": "application/json",
+        },
+        credentials: "same-origin",
+      })
+    ).json();
+    generateAllSongsTable(allMusics);
+  } catch (err) {
+    console.error(err);
+  }
+}
+/// heade end
+
+let allMusics = [];
+let myPlayList = [];
+const BASE_URL = "http://127.0.0.1:3000/music";
 
 loadAllMusics();
 async function loadAllMusics() {
   try {
     // console.log(cookie);
-    musics = await (
+    allMusics = await (
       await fetch("http://127.0.0.1:3000/music/all", {
         method: "GET",
         headers: {
@@ -14,7 +57,7 @@ async function loadAllMusics() {
         credentials: "same-origin",
       })
     ).json();
-    generateAllSongsTable(musics);
+    generateAllSongsTable(allMusics);
   } catch (err) {
     console.error(err);
   }
@@ -23,34 +66,23 @@ async function loadAllMusics() {
 loadMyPlayList();
 async function loadMyPlayList() {
   //
+  try {
+    // console.log(cookie);
+    myPlayList = await (
+      await fetch("http://127.0.0.1:3000/music/playlist", {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("token"),
+          "Content-Type": "application/json",
+        },
+        credentials: "same-origin",
+      })
+    ).json();
+    generateMyPlayList(myPlayList);
+  } catch (err) {
+    console.error(err);
+  }
 }
-
-let myMusics = [];
-const BASE_URL = "http://127.0.0.1:3000/music/files";
-//
-// header functionility
-let inputSearch = document.getElementById("inputSearch");
-let btnSearch = document.getElementById("btnSearch");
-
-btnSearch.onclick = () => {
-  let value = inputSearch.value;
-  if (value !== "") {
-    let msgSearch = document.getElementById("msgSearch");
-    msgSearch.innerText = `Results of '${value}'`;
-  } else msgSearch.innerText = "";
-  let regex = new RegExp(value, "g");
-  let res = musics.filter((val) => val.title.match(regex));
-  generateAllSongsTable(res);
-};
-
-let btnLogout = document.getElementById("btnLogout");
-btnLogout.onclick = () => {
-  console.log("Logout");
-  localStorage.removeItem("token");
-  console.log(document.cookie);
-  document.location.replace("login.html");
-};
-/// heade end
 
 let player = document.getElementById("player");
 let playBtn;
@@ -86,18 +118,19 @@ function generateAllSongsTable(musics) {
     btnAdd.setAttribute("data-bs-placement", "top");
     btnAdd.setAttribute("title", "add");
     btnAdd.innerHTML = `<i class="fa-solid fa-plus"></i>`;
-    btnAdd.onclick = () => {
+    btnAdd.onclick = async () => {
       console.log("Add");
-      let index = myMusics.findIndex((val) => val.id === song.id);
-      if (index > -1) {
-        // TODO show fancy error message
-        console.log("You already have this song in your playlist");
-      } else {
-        index = musics.findIndex((val) => val.id === song.id);
-        // error check
-        // TODO error check if index == -1
-        myMusics.push(musics[index]);
-        generateMyPlayList();
+      try {
+        let index = myPlayList.findIndex((val) => val.id === song.id);
+        if (index > -1) {
+          // TODO show fancy error message
+          console.log("You already have this song in your playlist");
+        } else {
+          myPlayList = await addSongToPlayList(song.id);
+          generateMyPlayList(myPlayList);
+        }
+      } catch (err) {
+        console.error(err);
       }
     };
 
@@ -114,7 +147,7 @@ function generateAllSongsTable(musics) {
     btnPlay.appendChild(iconPlay);
 
     btnPlay.onclick = () => {
-      let newSrc = `${BASE_URL}/${song.id}`;
+      let newSrc = `${BASE_URL}/files/${song.id}`;
       let srcMusic = player.getAttribute("src");
 
       if (newSrc == srcMusic) {
@@ -137,9 +170,33 @@ function generateAllSongsTable(musics) {
     //
   }
 }
-generateMyPlayList();
 
-function generateMyPlayList() {
+async function addSongToPlayList(id) {
+  return (
+    await fetch(`${BASE_URL}/playlist/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+    })
+  ).json();
+}
+async function removeSongFromPlayList(id) {
+  return (
+    await fetch(`${BASE_URL}/playlist/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+    })
+  ).json();
+}
+
+function generateMyPlayList(myMusics) {
   //TODO no data message
 
   console.log("My playlist generation");
@@ -172,13 +229,15 @@ function generateMyPlayList() {
     btnRemove.setAttribute("data-bs-placement", "top");
     btnRemove.setAttribute("title", "remove");
     btnRemove.innerHTML = `<i class="fa-solid fa-minus"></i>`;
-    btnRemove.onclick = () => {
+    btnRemove.onclick = async () => {
       console.log("Remove");
-      //
-      let index = myMusics.findIndex((val) => val.id == song.id);
-      myMusics.splice(index, 1);
-      console.log(myMusics);
-      generateMyPlayList();
+      //TODO
+      try {
+        myPlayList = await removeSongFromPlayList(song.id);
+        generateMyPlayList(myPlayList);
+      } catch (err) {
+        console.error(err);
+      }
     };
 
     let btnPlay = document.createElement("button");
@@ -194,7 +253,7 @@ function generateMyPlayList() {
     btnPlay.appendChild(iconPlay);
 
     btnPlay.onclick = () => {
-      let newSrc = `${BASE_URL}/${song.id}`;
+      let newSrc = `${BASE_URL}/files/${song.id}`;
       let srcMusic = player.getAttribute("src");
 
       if (newSrc == srcMusic) {
