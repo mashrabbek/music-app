@@ -1,0 +1,34 @@
+<!-- <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#"
+              >Home <span class="sr-only">(current)</span></a
+            >
+          </li>
+        </ul> -->
+
+
+<!-- <tr>
+              <th scope="row">3</th>
+              <td>Larry the Bird</td>
+              <td>Larry the Bird</td>
+
+              <td>
+                <button
+                  type="button"
+                  class="round-button mx-2"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="add"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+                <button
+                  class="round-button"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="play"
+                >
+                  <i class="fa-solid fa-play"></i>
+                </button>
+              </td>
+            </tr> -->

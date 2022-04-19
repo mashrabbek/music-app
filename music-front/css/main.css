@@ -1,0 +1,12 @@
+body {
+  min-height: 75rem;
+  padding-top: 4.5rem;
+}
+
+.round-button {
+  border-radius: 20px;
+}
+
+span {
+  color: white;
+}

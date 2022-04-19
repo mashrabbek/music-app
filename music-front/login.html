@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <link rel="icon" href="./favicon.ico" />
+
+    <title>Music App Login</title>
+
+    <link href="./dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="./css/main.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="#">Music App</a>
+
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <form class="form-inline ml-auto mt-md-0">
+          <div class="container">
+            <div class="row">
+              <span class="m-3">Username: </span>
+              <input
+                class="form-control mr-sm-3"
+                type="text"
+                placeholder="Username"
+                id="inputUsername"
+              />
+              <span class="m-3">Password: </span>
+              <input
+                class="form-control mr-sm-2"
+                type="password"
+                placeholder="Password"
+                id="inputPassword"
+              />
+              <button
+                class="btn btn-outline-success my-2 my-sm-0"
+                type="button"
+                id="btnLogin"
+                onclick="login(event)"
+              >
+                Login
+              </button>
+            </div>
+
+            <div class="row justify-content-center">
+              <span style="color: red" id="msgLogin"></span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <p></p>
+    </nav>
+
+    <main role="main" class="container">
+      <div class="jumbotron">
+        <h1>Welcome to my Music App <i class="fa-solid fa-music-note"></i></h1>
+      </div>
+    </main>
+    <script
+      src="https://kit.fontawesome.com/40db235053.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="dist/js/bootstrap.min.js"></script>
+  </body>
+</html>
