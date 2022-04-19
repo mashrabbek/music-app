@@ -1,37 +1,29 @@
-let musics = [
-  {
-    id: 1,
-    title: "Modern talking",
-    author: "Michael Jackson",
-    file: "modern-talking.mp3",
-    releaseDate: "22/09/2011",
-    poster: "http://127.0.0.1/images/1",
-  },
-  {
-    id: 2,
-    title: "Modern talking2",
-    author: "Michael Jackson",
-    file: "modern-talking.mp3",
-    releaseDate: "22/09/2012",
-    poster: "http://127.0.0.1/images/1",
-  },
-  {
-    id: 3,
-    title: "Modern talking3",
-    author: "Michael Jackson",
-    file: "modern-talking.mp3",
-    releaseDate: "22/09/2013",
-    poster: "http://127.0.0.1/images/1",
-  },
-  {
-    id: 4,
-    title: "Modern talking4",
-    author: "Michael Jackson",
-    file: "modern-talking.mp3",
-    releaseDate: "22/09/2014",
-    poster: "http://127.0.0.1/images/1",
-  },
-];
+let musics = [];
+
+loadAllMusics();
+async function loadAllMusics() {
+  try {
+    // console.log(cookie);
+    musics = await (
+      await fetch("http://127.0.0.1:3000/music/all", {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("token"),
+          "Content-Type": "application/json",
+        },
+        credentials: "same-origin",
+      })
+    ).json();
+    generateAllSongsTable(musics);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+loadMyPlayList();
+async function loadMyPlayList() {
+  //
+}
 
 let myMusics = [];
 const BASE_URL = "http://127.0.0.1:3000/music/files";
@@ -51,13 +43,18 @@ btnSearch.onclick = () => {
   generateAllSongsTable(res);
 };
 
+let btnLogout = document.getElementById("btnLogout");
+btnLogout.onclick = () => {
+  console.log("Logout");
+  localStorage.removeItem("token");
+  console.log(document.cookie);
+  document.location.replace("login.html");
+};
 /// heade end
 
 let player = document.getElementById("player");
 let playBtn;
 let playIcon;
-
-generateAllSongsTable(musics);
 
 function generateAllSongsTable(musics) {
   let allSongTable = document.getElementById("all-songs");

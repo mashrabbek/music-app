@@ -4,8 +4,9 @@ const path = require("path");
 const fs = require("fs");
 
 const musicController = require("../controllers/music-controller");
+const authMid = require("../middleware/auth-mid");
 
-router.get("/all", musicController.getAllMusics);
+router.get("/all", authMid, musicController.getAllMusics);
 
 router.get("/files/:id", (req, res) => {
   let files = [

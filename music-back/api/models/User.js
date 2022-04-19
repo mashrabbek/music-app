@@ -8,6 +8,7 @@ let users = [
     password: "123",
   },
 ];
+const jwt = require("jsonwebtoken");
 
 class User {
   constructor(username, password) {
@@ -26,9 +27,20 @@ class User {
     let index = users.findIndex((val) => val.username == username);
     if (index > -1) {
       let pass = users[index].password;
-      if (pass == password) return Date.now().toString() + "_" + username;
+      if (pass == password) {
+        const accessToken = jwt.sign(
+          {
+            username: username,
+          },
+          process.env.JWT_KEY
+        );
+        return accessToken;
+      }
     }
     return null;
+  }
+  static findByUserName(username) {
+    return users.find((val) => val.username == username);
   }
 }
 
