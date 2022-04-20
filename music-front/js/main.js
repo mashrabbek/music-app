@@ -3,18 +3,25 @@
 let inputSearch = document.getElementById("inputSearch");
 let btnSearch = document.getElementById("btnSearch");
 
-btnSearch.onclick = async () => {
+btnSearch.onclick = onSearch;
+//TODO
+// function searchMusic(e) {
+//   console.log(event.key);
+//   if (event.key === "Enter") {
+//     onSearch();
+//   }
+// }
+async function onSearch() {
   let value = inputSearch.value;
   if (value !== "") {
     let msgSearch = document.getElementById("msgSearch");
     msgSearch.innerText = `Results of '${value}'`;
   } else msgSearch.innerText = "";
   await searchMusic(value);
-};
+}
 
 let btnLogout = document.getElementById("btnLogout");
 btnLogout.onclick = () => {
-  console.log("Logout");
   localStorage.removeItem("token");
   document.location.replace("login.html");
 };
@@ -61,8 +68,8 @@ let playerbtnRepeat = document.getElementById("btnRepeat");
 let playerbtnShuffle = document.getElementById("btnShuffle");
 let playerbtnRepeatOne = document.getElementById("btnRepeatOne");
 
-let REPEAT = "O"; // one=> O, repeat=>R, shuffle=> S
-playerbtnRepeatOne.style.backgroundColor = "green";
+let REPEAT = "R"; // one=> O, repeat=>R, shuffle=> S
+playerbtnRepeat.style.backgroundColor = "green";
 
 playerBtnPlay.onclick = () => {
   //
@@ -76,7 +83,6 @@ playerbtnRepeat.onclick = () => {
   playerbtnRepeatOne.style.backgroundColor = null;
   REPEAT = "R";
   playerbtnRepeat.style.backgroundColor = "green";
-  console.log(REPEAT);
 };
 playerbtnShuffle.onclick = () => {
   //
@@ -84,7 +90,6 @@ playerbtnShuffle.onclick = () => {
   playerbtnRepeatOne.style.backgroundColor = null;
   REPEAT = "S";
   playerbtnShuffle.style.backgroundColor = "green";
-  console.log(REPEAT);
 };
 playerbtnRepeatOne.onclick = () => {
   //
@@ -92,12 +97,11 @@ playerbtnRepeatOne.onclick = () => {
   playerbtnShuffle.style.backgroundColor = null;
   REPEAT = "O";
   playerbtnRepeatOne.style.backgroundColor = "green";
-  console.log(REPEAT);
 };
 
 playerBtnNext.onclick = () => {
   if (currentMusic.id) {
-    let nextTrack = findNext("O");
+    let nextTrack = findNext(REPEAT);
     stop();
     currentMusic = nextTrack;
     play();
@@ -106,7 +110,7 @@ playerBtnNext.onclick = () => {
 
 playerBtnPrev.onclick = () => {
   if (currentMusic.id) {
-    let prevTrack = findPrev("O");
+    let prevTrack = findPrev(REPEAT);
     stop();
     currentMusic = prevTrack;
     play();
@@ -124,11 +128,11 @@ function findNext(REP) {
   let id = currentMusic.id;
   let index = myPlayList.findIndex((val) => val.id == id);
   switch (REP) {
-    case "O":
+    case "R":
       return index < myPlayList.length - 1
         ? myPlayList[index + 1]
         : myPlayList[0];
-    case "R":
+    case "O":
       return currentMusic;
     case "S":
       return myPlayList[Math.floor(Math.random() * myPlayList.length)];
@@ -142,11 +146,11 @@ function findPrev(REP) {
   let id = currentMusic.id;
   let index = myPlayList.findIndex((val) => val.id == id);
   switch (REP) {
-    case "O":
+    case "R":
       return index == 0
         ? myPlayList[myPlayList.length - 1]
         : myPlayList[index - 1];
-    case "R":
+    case "O":
       return currentMusic;
     case "S":
       return myPlayList[Math.floor(Math.random() * myPlayList.length)];
@@ -162,7 +166,6 @@ function findPrev(REP) {
 loadAllMusics();
 async function loadAllMusics() {
   try {
-    // console.log(cookie);
     allMusics = await (
       await fetch(`${BASE_URL}/all`, {
         method: "GET",
@@ -183,7 +186,6 @@ loadMyPlayList();
 async function loadMyPlayList() {
   //
   try {
-    // console.log(cookie);
     myPlayList = await (
       await fetch(`${BASE_URL}/playlist`, {
         method: "GET",
@@ -231,13 +233,10 @@ function generateAllSongsTable(musics) {
     btnAdd.setAttribute("title", "add");
     btnAdd.innerHTML = `<i class="fa-solid fa-plus"></i>`;
     btnAdd.onclick = async () => {
-      console.log("Add");
       try {
-        console.log({ add: myPlayList });
         let index = myPlayList.findIndex((val) => val.id === song.id);
         if (index > -1) {
-          // TODO show fancy error message
-          console.log("You already have this song in your playlist");
+          myAlertMessageTop("This song is already in the list !!!!");
         } else {
           myPlayList = await addSongToPlayList(song.id);
           //generateMyPlayList(myPlayList);
@@ -281,9 +280,6 @@ async function removeSongFromPlayList(id) {
 }
 
 function generateMyPlayList(myMusics) {
-  //TODO no data message
-
-  console.log("My playlist generation");
   let myPlayList = document.getElementById("my-songs");
   myPlayList.innerHTML = "";
 
@@ -314,8 +310,6 @@ function generateMyPlayList(myMusics) {
     btnRemove.setAttribute("title", "remove");
     btnRemove.innerHTML = `<i class="fa-solid fa-minus"></i>`;
     btnRemove.onclick = async () => {
-      console.log("Remove");
-      //TODO
       try {
         if (currentMusic.id === song.id) {
           // playing
@@ -324,8 +318,7 @@ function generateMyPlayList(myMusics) {
         }
         myPlayList = await removeSongFromPlayList(song.id);
         loadMyPlayList();
-        // console.log(myPlayList);
-        // generateMyPlayList(myPlayList);
+        //generateMyPlayList(myPlayList);
       } catch (err) {
         console.error(err);
       }
@@ -340,7 +333,11 @@ function generateMyPlayList(myMusics) {
 
     // play pause button
     let iconPlay = document.createElement("i");
-    iconPlay.setAttribute("class", "fa-solid fa-play");
+
+    if (currentMusic.id == song.id)
+      iconPlay.setAttribute("class", "fa-solid fa-pause");
+    else iconPlay.setAttribute("class", "fa-solid fa-play");
+
     iconPlay.setAttribute("id", "iconPlay" + song.id);
     btnPlay.appendChild(iconPlay);
 
@@ -375,7 +372,7 @@ function play() {
   };
   player.setAttribute("src", `${BASE_URL}/files/${currentMusic.id}`);
   let playIcon = document.getElementById("iconPlay" + currentMusic.id);
-  playerTitleSong.innerHTML = currentMusic.title;
+  playerTitleSong.innerHTML = currentMusic.title + " by " + currentMusic.author;
   playIcon.setAttribute("class", "fa-solid fa-pause");
   playerIconPlay.setAttribute("class", "fa-solid fa-pause");
   player.play();
@@ -394,7 +391,6 @@ function pause() {
 }
 
 function stop() {
-  console.log({ stop: currentMusic.id });
   if (currentMusic.id) {
     let playIcon = document.getElementById("iconPlay" + currentMusic.id);
     playIcon.setAttribute("class", "fa-solid fa-play");
@@ -403,6 +399,7 @@ function stop() {
     spanTime.innerText = "00:00/00:00";
     playerTitleSong.innerText = ".";
     player.pause();
+    player.setAttribute("src", ``);
   }
 }
 
@@ -413,4 +410,12 @@ function secToMin(seconds) {
   min = min > 9 ? min : `0${min}`;
   sec = sec > 9 ? sec : `0${sec}`;
   return `${min}:${sec}`;
+}
+function myAlertMessageTop(message) {
+  let msgTop = document.getElementById("msgTop");
+  msgTop.innerText = message;
+  msgTop.style.display = "block";
+  setTimeout(function () {
+    msgTop.style.display = "none";
+  }, 2000);
 }

@@ -1,38 +1,42 @@
+const path = require("path");
+
 let musics = [
   {
     id: 1,
-    title: "Modern talking",
-    author: "Michael Jackson",
-    file: "modern-talking.mp3",
+    title: "Moya Mama",
+    author: "Cute baby girl",
+    file: "mama.mp3",
     releaseDate: "22/09/2011",
-    poster: "http://127.0.0.1/images/1",
   },
   {
     id: 2,
-    title: "Modern talking2",
-    author: "Michael Jackson",
-    file: "modern-talking.mp3",
+    title: "Dard",
+    author: "Benom group",
+    file: "benom.mp3",
     releaseDate: "22/09/2012",
-    poster: "http://127.0.0.1/images/1",
   },
   {
     id: 3,
-    title: "Modern talking3",
-    author: "Michael Jackson",
-    file: "modern-talking.mp3",
+    title: "Yalole",
+    author: "Bojalar",
+    file: "Bojalar.mp3",
     releaseDate: "22/09/2013",
-    poster: "http://127.0.0.1/images/1",
   },
   {
     id: 4,
-    title: "Modern talking4",
-    author: "Michael Jackson",
-    file: "modern-talking.mp3",
+    title: "Bemorman",
+    author: "Shaxzoda",
+    file: "shax.mp3",
     releaseDate: "22/09/2014",
-    poster: "http://127.0.0.1/images/1",
+  },
+  {
+    id: 5,
+    title: "Yoz ifori",
+    author: "Korean movie soundtrack",
+    file: "yozifori.mp3",
+    releaseDate: "22/09/2014",
   },
 ];
-
 let myplaylist = {};
 
 class Music {
@@ -47,26 +51,28 @@ class Music {
 
   static addSongToPlayList(username, id) {
     let songIndex = musics.findIndex((song) => song.id == id);
-    console.log({ songIndex });
     if (songIndex > -1) {
       myplaylist[username].push(musics[songIndex]);
     }
-    console.log(myplaylist[username]);
     return myplaylist[username];
   }
   static removeSongFromPlayList(username, id) {
     let myList = myplaylist[username];
     let songIndex = myList.findIndex((song) => song.id == id);
-    console.log({ songIndex });
     if (songIndex > -1) {
       myList.splice(songIndex, 1);
     }
     return myList;
   }
-  static searchByName(text) {
-    let regex = new RegExp(text, "g");
-    let res = musics.filter((val) => val.title.match(regex));
+  static searchByName(textSearch) {
+    let regex = new RegExp(textSearch, "g");
+    let res = musics.filter((val) => val.title.toLowerCase().match(regex));
     return res;
+  }
+  static getMusicFileById(id) {
+    let song = musics.find((val) => val.id == id);
+    if (!song) return null;
+    return path.join(__dirname, "..", "..", "assets", "music", `${song.file}`);
   }
 }
 

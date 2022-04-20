@@ -14,11 +14,6 @@ app.use(
 const musicRouter = require("./routes/music-route");
 const authRouter = require("./routes/auth-route");
 
-// app.use((req, res, next) => {
-//   console.log(req.headers);
-//   next();
-// });
-
 app.use("/auth", authRouter);
 app.use("/music", musicRouter);
 

@@ -10,3 +10,11 @@ body {
 span {
   color: white;
 }
+
+.myAlert-top {
+  position: fixed;
+  top: 65px;
+  left: 2%;
+  width: 96%;
+  display: none;
+}
