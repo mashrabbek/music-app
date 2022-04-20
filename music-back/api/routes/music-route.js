@@ -36,8 +36,9 @@ router.get("/files/:id", (req, res) => {
     "music",
     `${song.file}`
   );
-  let readStream = fs.createReadStream(filePath);
-  readStream.pipe(res);
+  res.sendFile(filePath);
+  //let readStream = fs.createReadStream(filePath);
+  //readStream.pipe(res);
 });
 
 module.exports = router;

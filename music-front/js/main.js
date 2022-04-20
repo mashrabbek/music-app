@@ -42,13 +42,129 @@ async function searchMusic(title) {
 let allMusics = [];
 let myPlayList = [];
 const BASE_URL = "http://127.0.0.1:3000/music";
+let currentMusic = {};
+
+let player = document.getElementById("player");
+player.onended = playAutoNext;
+
+// PLAYER
+
+let playerBtnPrev = document.getElementById("btnPrev");
+let playerBtnPlay = document.getElementById("btnPlay");
+let playerIconPlay = document.getElementById("iconPlay");
+let playerBtnNext = document.getElementById("btnNext");
+let playerProgressBar = document.getElementById("progBar");
+let spanTime = document.getElementById("spanTime");
+let playerTitleSong = document.getElementById("playerTitleSong");
+//
+let playerbtnRepeat = document.getElementById("btnRepeat");
+let playerbtnShuffle = document.getElementById("btnShuffle");
+let playerbtnRepeatOne = document.getElementById("btnRepeatOne");
+
+let REPEAT = "O"; // one=> O, repeat=>R, shuffle=> S
+playerbtnRepeatOne.style.backgroundColor = "green";
+
+playerBtnPlay.onclick = () => {
+  //
+  if (currentMusic.id) {
+    player.paused ? resume() : pause();
+  }
+};
+playerbtnRepeat.onclick = () => {
+  //
+  playerbtnShuffle.style.backgroundColor = null;
+  playerbtnRepeatOne.style.backgroundColor = null;
+  REPEAT = "R";
+  playerbtnRepeat.style.backgroundColor = "green";
+  console.log(REPEAT);
+};
+playerbtnShuffle.onclick = () => {
+  //
+  playerbtnRepeat.style.backgroundColor = null;
+  playerbtnRepeatOne.style.backgroundColor = null;
+  REPEAT = "S";
+  playerbtnShuffle.style.backgroundColor = "green";
+  console.log(REPEAT);
+};
+playerbtnRepeatOne.onclick = () => {
+  //
+  playerbtnRepeat.style.backgroundColor = null;
+  playerbtnShuffle.style.backgroundColor = null;
+  REPEAT = "O";
+  playerbtnRepeatOne.style.backgroundColor = "green";
+  console.log(REPEAT);
+};
+
+playerBtnNext.onclick = () => {
+  if (currentMusic.id) {
+    let nextTrack = findNext("O");
+    stop();
+    currentMusic = nextTrack;
+    play();
+  }
+};
+
+playerBtnPrev.onclick = () => {
+  if (currentMusic.id) {
+    let prevTrack = findPrev("O");
+    stop();
+    currentMusic = prevTrack;
+    play();
+  }
+};
+
+function playAutoNext() {
+  let nextTrack = findNext(REPEAT);
+  stop();
+  currentMusic = nextTrack;
+  play();
+}
+
+function findNext(REP) {
+  let id = currentMusic.id;
+  let index = myPlayList.findIndex((val) => val.id == id);
+  switch (REP) {
+    case "O":
+      return index < myPlayList.length - 1
+        ? myPlayList[index + 1]
+        : myPlayList[0];
+    case "R":
+      return currentMusic;
+    case "S":
+      return myPlayList[Math.floor(Math.random() * myPlayList.length)];
+    default:
+      return index < myPlayList.length - 1
+        ? myPlayList[index + 1]
+        : myPlayList[0];
+  }
+}
+function findPrev(REP) {
+  let id = currentMusic.id;
+  let index = myPlayList.findIndex((val) => val.id == id);
+  switch (REP) {
+    case "O":
+      return index == 0
+        ? myPlayList[myPlayList.length - 1]
+        : myPlayList[index - 1];
+    case "R":
+      return currentMusic;
+    case "S":
+      return myPlayList[Math.floor(Math.random() * myPlayList.length)];
+    default:
+      return index == 0
+        ? myPlayList[myPlayList.length - 1]
+        : myPlayList[index - 1];
+  }
+}
+
+//
 
 loadAllMusics();
 async function loadAllMusics() {
   try {
     // console.log(cookie);
     allMusics = await (
-      await fetch("http://127.0.0.1:3000/music/all", {
+      await fetch(`${BASE_URL}/all`, {
         method: "GET",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token"),
@@ -69,7 +185,7 @@ async function loadMyPlayList() {
   try {
     // console.log(cookie);
     myPlayList = await (
-      await fetch("http://127.0.0.1:3000/music/playlist", {
+      await fetch(`${BASE_URL}/playlist`, {
         method: "GET",
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token"),
@@ -83,10 +199,6 @@ async function loadMyPlayList() {
     console.error(err);
   }
 }
-
-let player = document.getElementById("player");
-let playBtn;
-let playIcon;
 
 function generateAllSongsTable(musics) {
   let allSongTable = document.getElementById("all-songs");
@@ -121,50 +233,22 @@ function generateAllSongsTable(musics) {
     btnAdd.onclick = async () => {
       console.log("Add");
       try {
+        console.log({ add: myPlayList });
         let index = myPlayList.findIndex((val) => val.id === song.id);
         if (index > -1) {
           // TODO show fancy error message
           console.log("You already have this song in your playlist");
         } else {
           myPlayList = await addSongToPlayList(song.id);
-          generateMyPlayList(myPlayList);
+          //generateMyPlayList(myPlayList);
+          loadMyPlayList();
         }
       } catch (err) {
         console.error(err);
       }
     };
 
-    let btnPlay = document.createElement("button");
-    btnPlay.setAttribute("type", "button");
-    btnPlay.setAttribute("class", "round-button mx-2");
-    btnPlay.setAttribute("data-bs-toggle", "tooltip");
-    btnPlay.setAttribute("data-bs-placement", "top");
-    btnPlay.setAttribute("title", "play");
-
-    // play pause button
-    let iconPlay = document.createElement("i");
-    iconPlay.setAttribute("class", "fa-solid fa-play");
-    btnPlay.appendChild(iconPlay);
-
-    btnPlay.onclick = () => {
-      let newSrc = `${BASE_URL}/files/${song.id}`;
-      let srcMusic = player.getAttribute("src");
-
-      if (newSrc == srcMusic) {
-        // play, pause
-        player.paused ? play() : pause();
-      } else {
-        // new play
-        pause();
-        player.setAttribute("src", newSrc);
-        playBtn = btnPlay;
-        playIcon = iconPlay;
-        play();
-      }
-      //
-    };
-    player.onended = stop;
-    tdActions.append(btnAdd, btnPlay);
+    tdActions.append(btnAdd);
     tr.append(tdId, tdTitle, tdReleaseDate, tdActions);
     allSongTable.appendChild(tr);
     //
@@ -233,8 +317,15 @@ function generateMyPlayList(myMusics) {
       console.log("Remove");
       //TODO
       try {
+        if (currentMusic.id === song.id) {
+          // playing
+          stop();
+          currentMusic = {};
+        }
         myPlayList = await removeSongFromPlayList(song.id);
-        generateMyPlayList(myPlayList);
+        loadMyPlayList();
+        // console.log(myPlayList);
+        // generateMyPlayList(myPlayList);
       } catch (err) {
         console.error(err);
       }
@@ -250,26 +341,21 @@ function generateMyPlayList(myMusics) {
     // play pause button
     let iconPlay = document.createElement("i");
     iconPlay.setAttribute("class", "fa-solid fa-play");
+    iconPlay.setAttribute("id", "iconPlay" + song.id);
     btnPlay.appendChild(iconPlay);
 
     btnPlay.onclick = () => {
       let newSrc = `${BASE_URL}/files/${song.id}`;
       let srcMusic = player.getAttribute("src");
-
       if (newSrc == srcMusic) {
-        // play, pause
-        player.paused ? play() : pause();
+        // resume
+        player.paused ? resume() : pause();
       } else {
-        // new play
-        pause();
-        player.setAttribute("src", newSrc);
-        playBtn = btnPlay;
-        playIcon = iconPlay;
+        stop();
+        currentMusic = song;
         play();
       }
-      //
     };
-    player.onended = stop;
 
     tdActions.append(btnRemove, btnPlay);
 
@@ -281,20 +367,50 @@ function generateMyPlayList(myMusics) {
 }
 
 function play() {
+  player.ontimeupdate = function () {
+    spanTime.innerText =
+      secToMin(player.currentTime) + "/" + secToMin(player.duration);
+    let percentage = (player.currentTime / player.duration) * 100;
+    playerProgressBar.setAttribute("value", percentage);
+  };
+  player.setAttribute("src", `${BASE_URL}/files/${currentMusic.id}`);
+  let playIcon = document.getElementById("iconPlay" + currentMusic.id);
+  playerTitleSong.innerHTML = currentMusic.title;
   playIcon.setAttribute("class", "fa-solid fa-pause");
-  playBtn.setAttribute("title", "pause");
+  playerIconPlay.setAttribute("class", "fa-solid fa-pause");
   player.play();
 }
-
+function resume() {
+  let playIcon = document.getElementById("iconPlay" + currentMusic.id);
+  playIcon.setAttribute("class", "fa-solid fa-pause");
+  playerIconPlay.setAttribute("class", "fa-solid fa-pause");
+  player.play();
+}
 function pause() {
-  if (playIcon && playBtn) {
+  let playIcon = document.getElementById("iconPlay" + currentMusic.id);
+  playIcon.setAttribute("class", "fa-solid fa-play");
+  playerIconPlay.setAttribute("class", "fa-solid fa-play");
+  player.pause();
+}
+
+function stop() {
+  console.log({ stop: currentMusic.id });
+  if (currentMusic.id) {
+    let playIcon = document.getElementById("iconPlay" + currentMusic.id);
     playIcon.setAttribute("class", "fa-solid fa-play");
-    playBtn.setAttribute("title", "play");
+    playerIconPlay.setAttribute("class", "fa-solid fa-play");
+    playerProgressBar.setAttribute("value", 0);
+    spanTime.innerText = "00:00/00:00";
+    playerTitleSong.innerText = ".";
     player.pause();
   }
 }
 
-function stop() {
-  playIcon.setAttribute("class", "fa-solid fa-play");
-  playBtn.setAttribute("title", "play");
+function secToMin(seconds) {
+  seconds = Math.round(seconds);
+  let min = Math.floor(seconds / 60);
+  let sec = seconds % 60;
+  min = min > 9 ? min : `0${min}`;
+  sec = sec > 9 ? sec : `0${sec}`;
+  return `${min}:${sec}`;
 }
