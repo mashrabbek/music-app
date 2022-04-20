@@ -36,6 +36,27 @@ let musics = [
     file: "yozifori.mp3",
     releaseDate: "22/09/2014",
   },
+  {
+    id: 6,
+    title: "Orchestra positive finish",
+    author: "Mixkit",
+    file: "mixkit-orchestra-positive-finish-695.wav",
+    releaseDate: "22/09/2012",
+  },
+  {
+    id: 7,
+    title: "Medieval orchestra announcement",
+    author: "Mixkit",
+    file: "mixkit-medieval-orchestra-announcement-694.wav",
+    releaseDate: "21/01/2012",
+  },
+  {
+    id: 8,
+    title: "Greeting music box tone",
+    author: "Mixkit",
+    file: "mixkit-greeting-music-box-tone-699.wav",
+    releaseDate: "22/09/2011",
+  },
 ];
 let myplaylist = {};
 
@@ -65,7 +86,7 @@ class Music {
     return myList;
   }
   static searchByName(textSearch) {
-    let regex = new RegExp(textSearch, "g");
+    let regex = new RegExp(textSearch.toLowerCase(), "g");
     let res = musics.filter((val) => val.title.toLowerCase().match(regex));
     return res;
   }
